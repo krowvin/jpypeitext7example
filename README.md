@@ -8,3 +8,5 @@ Note: I have also included the dependencies these classes use (i.e. slf4j, log4j
 
 ## Please do not redistribute the jar like this as this is only an example meant for educational purposes. 
 * The third party libraries should be distributed seperately as far as I can tell!
+Here are the jars contained in this zip
+![image](https://user-images.githubusercontent.com/23619282/170532938-ee6adcf7-5dbe-4d5c-9cd7-399c563d46d0.png)
