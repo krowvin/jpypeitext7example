@@ -121,8 +121,7 @@ if __name__ == '__main__':
     import jpype.imports
     from jpype.types import *
     print("Starting JVM")
-    jpype.startJVM("-Xms256m", "-Xmx256m",
-                   "-Doracle.metrics.clientid=JPYPE", classpath=["itext.7.2.2.jar"])
+    jpype.startJVM("-Xms256m", "-Xmx256m", classpath=["itext.7.2.2.jar"])
 
     from com.itextpdf.layout import Document, Canvas
     from com.itextpdf.layout.layout import LayoutContext, LayoutArea
