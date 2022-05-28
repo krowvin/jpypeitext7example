@@ -1,7 +1,6 @@
 # Create a PDF document using itext7 and Jpype
-# Minimal Example revised with Uladzimir's comments/code from
-# https://stackoverflow.com/a/72385258/9525730
-# Attempting to fit everything on one A4 page
+# Minimal Example
+# Attempts to fit to one page
 
 import calendar
 from datetime import datetime
@@ -96,23 +95,28 @@ def createDoc(mon="Mar", year="22"):
 
     pdfDoc = PdfDocument(PdfWriter(f'{PDF_NAME}.pdf'))
     document = Document(pdfDoc)
-
     # Source/comments from @Uladzimir via https://stackoverflow.com/a/72385258/9525730
     # Since it's too long to be fully fit via usual layout flow (e.g. Document#add), we should somehow scale it. 
     # But first of all, let us find how much space this table occupies if the page to be placed upon is boundless:
-    result = table.createRendererSubTree().setParent(document.getRenderer()).layout(LayoutContext(LayoutArea(1, Rectangle(10000, 10000))))
+    result = table.createRendererSubTree().setParent(document.getRenderer()).layout(
+        LayoutContext(LayoutArea(0, Rectangle(570, 840))))#.applyMargins(0, 10, 0, 10, False))))  # Rectangle(500, 500)))) Rectangle()
     occupiedRectangle = result.getOccupiedArea().getBBox()
+    print(occupiedRectangle)
     # Now let's create a form xobject of this table, which we will scale a few lines below:
+    print(occupiedRectangle.getWidth(), occupiedRectangle.getHeight())
     xObject = PdfFormXObject(Rectangle(occupiedRectangle.getWidth(), occupiedRectangle.getHeight()))
     Canvas(xObject, pdfDoc).add(table).close()
     # So now we have the xObject of the table, the only question is how to fit it, e.g. which scale coefficients to apply:
+    print(PageSize.A4.getWidth() / occupiedRectangle.getWidth(),
+          PageSize.A4.getHeight() / occupiedRectangle.getHeight())
     coefficient = min(PageSize.A4.getWidth() / occupiedRectangle.getWidth(), PageSize.A4.getHeight() / occupiedRectangle.getHeight())
     # We're almost done: now let's add the scaled version of the table to the document's page:
-    PdfCanvas(pdfDoc.addNewPage()).saveState().concatMatrix(coefficient, 0, 0, coefficient, 0, 0).addXObject(xObject).restoreState()
-
+    PdfCanvas(pdfDoc.addNewPage()) \
+    .saveState() \
+    .concatMatrix(coefficient, 0, 0, coefficient, 0, 0) \
+        .addXObjectAt(xObject, 10, 10).restoreState()
     document.close()
     print("Wrote", f"{PDF_NAME}.pdf")
-
 
 PDF_NAME = "example"
 
@@ -121,7 +125,8 @@ if __name__ == '__main__':
     import jpype.imports
     from jpype.types import *
     print("Starting JVM")
-    jpype.startJVM("-Xms256m", "-Xmx256m", classpath=["itext.7.2.2.jar"])
+    jpype.startJVM("-Xms256m", "-Xmx256m",
+                   "-Doracle.metrics.clientid=JPYPE", classpath=["itext.7.2.2.jar"])
 
     from com.itextpdf.layout import Document, Canvas
     from com.itextpdf.layout.layout import LayoutContext, LayoutArea
